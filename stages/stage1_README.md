@@ -56,6 +56,21 @@ def compose(self) -> ComposeResult:
 - **`OptionList`** renders a scrollable, selectable list of items with built-in arrow-key and mouse support.
 - **`border_title`** places a label directly inside the widget's top border.
 
+#### `return` vs. `yield` in `compose()`
+
+If you're used to regular Python functions, you might wonder why `compose()` uses `yield` instead of `return` (while `_record_label()` right above it uses `return`):
+
+| | `return` | `yield` |
+| :--- | :--- | :--- |
+| **How many values** | Sends back **one** value (e.g., a single string in `_record_label()`) | Produces a **sequence** of values one at a time (a generator) |
+| **Function lifetime** | **Exits immediately** and discards local state | **Pauses** at the `yield` line, keeps local state alive, and **resumes** on the next step |
+| **Inside a `with` block** | Closes the `with` block immediately on exit | Keeps the `with` block **active** across multiple `yield` statements |
+
+Why Textual relies on `yield` in `compose()`:
+1. **Multiple widgets without building lists by hand:** `compose()` streams `Header()`, then the workspace widgets, then `Footer()` cleanly in top-to-bottom order.
+2. **Context-manager nesting (`with Vertical(...):`):** Because `yield` pauses *inside* the `with` block instead of exiting the function, Textual knows that every widget yielded while inside `with Vertical(id="workspace"):` belongs as a **child** of `#workspace`. When execution leaves the `with` block, Textual automatically closes that container before yielding `Footer()`. With `return`, the function would terminate on the very first widget and couldn't express nested parent/child layouts this way.
+3. **Shortcut for many widgets (`yield from`):** In later stages, you'll also see `yield from self._build_field_rows(...)`, which yields every widget in a list one by one inside the active container.
+
 ### 5. Lifecycle: `__init__()` vs. `on_mount()`
 - **`__init__()`** stores application data (`self._records = [dict(rec) for rec in initial_records]`, copied so the caller's list isn't mutated). Never query widgets here—the DOM does not exist yet.
 - **`on_mount()`** runs once all widgets from `compose()` are mounted. That's where we look up `#record-list` via `self.query_one("#record-list", OptionList)`, highlight item `0`, and focus it so arrow keys work immediately.
