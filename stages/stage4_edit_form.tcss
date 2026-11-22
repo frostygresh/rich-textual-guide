@@ -1,0 +1,123 @@
+/* Stage 4 Stylesheet (stage4_edit_form.py)
+ * Full master-detail edit form with top filter bar, left list + preview,
+ * and right editable form with navigation and Save/Reset actions.
+ * Run `textual run --dev stages/stage4_edit_form.py` to live-reload CSS edits.
+ */
+
+/* Stack Header, #filter-bar, #workspace, and Footer vertically. */
+Screen {
+    layout: vertical;
+}
+
+/* Top search bar spanning the width of the app to filter #record-list live. */
+#filter-bar {
+    height: auto;                /* Shrink tightly around the Input */
+    padding: 1 2 0 2;            /* Align horizontally with #workspace */
+}
+
+#filter-input {
+    width: 1fr;                  /* Stretch across the full top bar */
+}
+
+/* Main two-pane master-detail area between #filter-bar and Footer. */
+#workspace {
+    height: 1fr;        /* Fill all remaining vertical space */
+    padding: 1 2;       /* 1 cell top/bottom, 2 cells left/right */
+}
+
+/* Left pane (master): item list on top + Rich preview of selected item below. */
+#list-pane {
+    width: 1fr;         /* Take 1/3 of the workspace width */
+    min-width: 26;      /* Keep item names readable on narrower terminals */
+    margin-right: 2;    /* Gap between the item list and detail pane */
+}
+
+/* Clickable/keyboard-navigable list of all dictionaries in the array. */
+#record-list {
+    height: 1fr;            /* Grow to show as many items as fit */
+    margin-bottom: 1;       /* Gap above the selected-dict preview panel */
+    border: round $accent;  /* Rounded accent border with border_title */
+}
+
+/* Scrollable wrapper for the Rich Pretty preview of the selected record. */
+#preview-scroll {
+    height: auto;           /* Fit tightly around the Panel when short */
+    max-height: 14;         /* Scroll internally if the dict has many keys */
+}
+
+/* Right pane (detail): displays and edits the currently selected item. */
+#detail-pane {
+    width: 2fr;             /* Take 2/3 of the workspace width */
+    border: round $primary; /* Rounded box border using theme primary */
+    padding: 1 2;           /* Inner breathing room inside the border */
+}
+
+/* NEW in Stage 4: top bar inside #detail-pane for Prev / status / Next. */
+#record-nav {
+    height: auto;                /* Wrap tightly around the buttons */
+    align-vertical: middle;      /* Align label vertically with buttons */
+    padding-bottom: 1;           /* Space above the divider line */
+    margin-bottom: 1;            /* Space between divider and first field */
+    border-bottom: solid $panel; /* Subtle horizontal divider */
+}
+
+/* Center the `Record X of Y` text between the Prev and Next buttons. */
+#record-status {
+    width: 1fr;                  /* Claim all space between Prev and Next */
+    content-align: center middle;
+    text-style: bold;
+}
+
+/* Scrollable container for form rows so long dicts never clip off-screen. */
+#fields {
+    height: 1fr;            /* Expand to push #actions to the bottom */
+}
+
+/* One horizontal row per dictionary key: Label on left, control on right. */
+.form-row {
+    height: auto;           /* Wrap tightly around the tallest child */
+    align-vertical: middle; /* Center Label vertically with Input/Switch */
+    margin-bottom: 1;       /* 1 blank row of spacing between fields */
+}
+
+/* Fixed-width left column so all inputs line up cleanly down the form. */
+.field-label {
+    width: 18;              /* 18 character cells wide */
+    padding-right: 1;       /* Small gap between label text and control */
+    text-style: bold;       /* Make field names stand out */
+}
+
+/* Text/numeric inputs stretch across whatever row width remains. */
+.field-input {
+    width: 1fr;
+}
+
+/* Textual adds the `-invalid` class automatically when Input validation
+   fails (e.g. non-integer text in `type="integer"`). */
+Input.-invalid {
+    border: tall $error;    /* Highlight invalid fields in theme error */
+}
+
+/* Footer row inside #detail-pane for the Save and Reset buttons. */
+#actions {
+    height: auto;             /* Only as tall as the buttons need */
+    padding-top: 1;           /* Space between divider line and buttons */
+    border-top: solid $panel; /* Subtle horizontal divider above buttons */
+}
+
+/* Descendant selector: add spacing between buttons inside #actions. */
+#actions Button {
+    margin-right: 1;
+}
+
+/* Let the Rich Panel preview size itself to fit the dictionary lines. */
+#dict-preview {
+    height: auto;
+}
+
+/* Message displayed in #fields when the filter matches zero items. */
+#empty-state {
+    padding: 1 0;
+    color: $text-muted;
+    text-style: italic;
+}

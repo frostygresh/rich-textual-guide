@@ -1,0 +1,31 @@
+/* Stage 2 Stylesheet (stage2_filter.py)
+ * Adds the top #filter-bar above #workspace.
+ * Run `textual run --dev stages/stage2_filter.py` to live-reload CSS edits.
+ */
+
+/* Stack Header, #filter-bar, #workspace, and Footer vertically. */
+Screen {
+    layout: vertical;
+}
+
+/* NEW in Stage 2: top search bar spanning the width of the app. */
+#filter-bar {
+    height: auto;        /* Shrink tightly around the Input widget */
+    padding: 1 2 0 2;    /* Align left/right margins with #workspace */
+}
+
+#filter-input {
+    width: 1fr;          /* Stretch across the full width of #filter-bar */
+}
+
+/* Main content area between #filter-bar and Footer. */
+#workspace {
+    height: 1fr;        /* Fill all remaining vertical space */
+    padding: 1 2;       /* 1 cell top/bottom, 2 cells left/right */
+}
+
+/* Selectable list displaying matching dictionary items. */
+#record-list {
+    height: 1fr;            /* Expand to fill the workspace height */
+    border: round $accent;  /* Rounded border with border_title support */
+}

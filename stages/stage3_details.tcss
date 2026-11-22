@@ -1,0 +1,56 @@
+/* Stage 3 Stylesheet (stage3_details.py)
+ * Splits #workspace into a left item list (#list-pane) and right details
+ * pane (#detail-pane).
+ * Run `textual run --dev stages/stage3_details.py` to live-reload CSS edits.
+ */
+
+/* Stack Header, #filter-bar, #workspace, and Footer vertically. */
+Screen {
+    layout: vertical;
+}
+
+/* Top search bar spanning the width of the app. */
+#filter-bar {
+    height: auto;        /* Shrink tightly around the Input widget */
+    padding: 1 2 0 2;    /* Align horizontally with #workspace */
+}
+
+#filter-input {
+    width: 1fr;          /* Stretch across the full top bar */
+}
+
+/* NEW in Stage 3: horizontal master-detail area below #filter-bar. */
+#workspace {
+    height: 1fr;        /* Fill all remaining vertical space */
+    padding: 1 2;       /* 1 cell top/bottom, 2 cells left/right */
+}
+
+/* Left pane (master): list of matching dictionary items. */
+#list-pane {
+    width: 1fr;         /* Take 1/3 of the workspace width */
+    min-width: 26;      /* Keep item names readable on narrower terminals */
+    margin-right: 2;    /* Gap between list pane and detail pane */
+}
+
+#record-list {
+    height: 1fr;            /* Expand to fill the left sidebar */
+    border: round $accent;  /* Rounded accent border with border_title */
+}
+
+/* Right pane (detail): scrollable read-only cards for the selected item. */
+#detail-pane {
+    width: 2fr;             /* Take 2/3 of the workspace width */
+    border: round $primary; /* Rounded box border using theme primary */
+    padding: 1 2;           /* Inner breathing room around the Rich panels */
+}
+
+/* Rich Table.grid Panel showing formatted fields and types. */
+#detail-card {
+    height: auto;           /* Fit tightly around the table rows */
+    margin-bottom: 1;       /* Gap above the raw dictionary Panel */
+}
+
+/* Rich Pretty Panel showing the raw Python dict representation. */
+#raw-preview {
+    height: auto;
+}
