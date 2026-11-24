@@ -55,6 +55,10 @@ DEFAULT_RECORDS: list[FormRecord] = [
 ]
 
 
+# Every Textual application subclasses `App`, which provides the event loop,
+# DOM management, TCSS styling engine, Command Palette (Ctrl+P), and built-in
+# actions like `quit`. The `[None]` type argument means `app.run()` returns
+# `None` (replace `None` with another type if you return data via `self.exit`).
 class Stage1ListApp(App[None]):
     """Stage 1 app that displays a list of dictionary items in an OptionList.
 
@@ -77,10 +81,17 @@ class Stage1ListApp(App[None]):
             Palette.
     """
 
+    # Automatically displayed in the top `Header` widget.
     TITLE = "Stage 1: Item List"
     SUB_TITLE = "Displaying a list[dict] with OptionList"
+    # External TCSS stylesheet resolved relative to this Python file
+    # (hot-reloads automatically when run with `textual run --dev`).
     CSS_PATH = "stage1_list.tcss"
 
+    # App-wide keyboard shortcuts shown in `Footer` and Command Palette.
+    # Each Binding(key, action, label) calls `action_<action>()` (`"quit"` is
+    # built into `App`). `ClassVar[list[BindingType]]` matches `App.BINDINGS`
+    # so linters (Ruff RUF012) and type checkers know it is intentionally shared.
     BINDINGS: ClassVar[list[BindingType]] = [
         Binding("q", "quit", "Quit"),
     ]
