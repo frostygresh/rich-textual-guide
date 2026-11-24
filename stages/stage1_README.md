@@ -20,6 +20,24 @@ In a traditional Python CLI script, your code runs top-to-bottom—calling `prin
 > [!IMPORTANT]
 > Because Textual manages the entire terminal screen while running, **never call `print()`** inside a Textual app—it writes raw text over the UI. (Later stages show `self.notify()` and Rich widgets for displaying output, and `textual console` for debugging.)
 
+### What Does "DOM" Mean?
+
+**DOM** stands for **Document Object Model**. The term comes from web browsers, where it refers to the live tree of HTML elements in memory that CSS styles and JavaScript manipulates. Textual borrows the exact same concept: the **DOM** is the live **parent–child tree of widgets** built by `compose()`:
+
+```text
+Screen
+├── Header
+├── Vertical (#workspace)
+│   └── OptionList (#record-list)
+└── Footer
+```
+
+You'll see the DOM come up throughout Textual for four reasons:
+1. **Styling (TCSS):** Rules like `#record-list { border: round $accent; }` match widgets inside the DOM tree.
+2. **Querying widgets:** `self.query_one("#record-list", OptionList)` searches the live DOM to grab a widget—which is why it only works **after** widgets are mounted (`on_mount()`), not in `__init__()`.
+3. **Event bubbling:** Messages from child widgets (like `Input.Changed` or `Button.Pressed` in later stages) travel upward through the DOM from child → parent container → `Screen` → `App` until an `@on(...)` handler catches them.
+4. **Dynamic updates:** You can add or remove widgets from the live DOM at runtime (such as rebuilding form rows in Stage 4).
+
 ---
 
 ## Quick Start: Install & Run Stage 1
