@@ -85,6 +85,9 @@ class Stage1ListApp(App[None]):
         Binding("q", "quit", "Quit"),
     ]
 
+    # Python runs `__init__()` when `Stage1ListApp(DEFAULT_RECORDS)` is created—
+    # before `.run()`, `compose()`, or `on_mount()`. Use it to validate and
+    # store application data, never to query widgets (the DOM does not exist yet).
     def __init__(self, initial_records: list[FormRecord]) -> None:
         """Initialize the app with shallow copies of ``initial_records``.
 
@@ -94,11 +97,18 @@ class Stage1ListApp(App[None]):
         Raises:
             ValueError: If ``initial_records`` is empty.
         """
+        # Fail fast if the caller passes an empty list.
         if not initial_records:
             raise ValueError("initial_records must contain at least one dictionary.")
+        # Always call `super().__init__()` so Textual's `App` base class sets up
+        # its internal CSS engine, message queue, and screen stack.
         super().__init__()
+        # Copy each dictionary so later edits never mutate the caller's list.
         self._records: list[FormRecord] = [dict(rec) for rec in initial_records]
 
+    # Internal helper (the leading `_` signals private use by convention) that
+    # converts one dictionary into a single menu label for `OptionList`. Unlike
+    # `compose()`, it uses `return` because it produces one string per call.
     def _record_label(self, index: int, record: FormRecord) -> str:
         """Build a readable label for one dictionary row in ``OptionList``.
 
@@ -109,9 +119,15 @@ class Stage1ListApp(App[None]):
         Returns:
             Formatted label string like ``"1. ada_lovelace"``.
         """
+        # Grab the first value in the dict, or fall back to "Record 1", etc.
         summary = next(iter(record.values()), f"Record {index + 1}")
+        # Prefix with a human-friendly 1-based row number (`index + 1`).
         return f"{index + 1}. {summary}"
 
+    # Textual calls `compose()` automatically at startup (after `__init__()` and
+    # before `on_mount()`) to build the app's initial widget tree (DOM). It uses
+    # `yield` rather than `return` so Textual can collect multiple widgets in
+    # order and keep parent-child nesting intact inside `with` container blocks.
     def compose(self) -> ComposeResult:
         """Build the initial widget tree with a Header, item list, and Footer.
 
