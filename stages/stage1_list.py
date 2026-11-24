@@ -153,9 +153,7 @@ class Stage1ListApp(App[None]):
         #    yielded here is mounted as a child of `#workspace`.
         with Vertical(id="workspace"):
             # 3. Convert each dictionary into a display string ("1. ada_lovelace").
-            labels = [
-                self._record_label(i, rec) for i, rec in enumerate(self._records)
-            ]
+            labels = [self._record_label(i, rec) for i, rec in enumerate(self._records)]
             # 4. Unpack the labels into a selectable list and tag it with an ID
             #    so TCSS (`#record-list`) and `on_mount()` can target it.
             option_list = OptionList(*labels, id="record-list")

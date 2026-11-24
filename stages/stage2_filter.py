@@ -132,9 +132,7 @@ class Stage2FilterApp(App[None]):
             )
 
         with Vertical(id="workspace"):
-            labels = [
-                self._record_label(i, rec) for i, rec in enumerate(self._records)
-            ]
+            labels = [self._record_label(i, rec) for i, rec in enumerate(self._records)]
             option_list = OptionList(*labels, id="record-list")
             option_list.border_title = f"Items ({len(self._records)})"
             yield option_list
@@ -147,6 +145,10 @@ class Stage2FilterApp(App[None]):
         option_list.highlighted = 0
         self.query_one("#filter-input", Input).focus()
 
+    # Internal helper called on every keystroke in `#filter-input` (via
+    # `handle_filter_changed`). Instead of removing items from `self._records`,
+    # it stores matching indexes in `self._filtered_indices` so the original
+    # list stays intact while `#record-list` updates in place.
     def _apply_filter(self, query: str) -> None:
         """Filter ``#record-list`` to records whose values contain ``query``.
 
@@ -154,24 +156,31 @@ class Stage2FilterApp(App[None]):
             query: Case-insensitive search text from ``#filter-input``. An
                 empty or whitespace-only string shows all records.
         """
+        # 1. Normalize the search text for case-insensitive substring matching.
         needle = query.strip().lower()
+        # 2. Collect real indexes from `self._records` whose values match
+        #    (or keep every index when the filter box is empty).
         self._filtered_indices = [
             i
             for i, rec in enumerate(self._records)
             if not needle or any(needle in str(v).lower() for v in rec.values())
         ]
 
+        # 3. Query `#record-list` and replace its displayed rows in place.
         option_list = self.query_one("#record-list", OptionList)
         option_list.clear_options()
         option_list.add_options(
             [self._record_label(i, self._records[i]) for i in self._filtered_indices]
         )
 
+        # 4. Update the border title to show "Items (shown/total)" while
+        #    filtered, or "Items (total)" when the search box is cleared.
         total = len(self._records)
         shown = len(self._filtered_indices)
         option_list.border_title = (
             f"Items ({shown}/{total})" if needle else f"Items ({total})"
         )
+        # 5. Reset the highlight to the first visible match (when any exist).
         if self._filtered_indices:
             option_list.highlighted = 0
 
@@ -194,6 +203,7 @@ class Stage2FilterApp(App[None]):
             event: Textual ``Input.Changed`` message containing the updated
                 text in ``event.value``.
         """
+        # Pass the latest text from the Input widget into our filter helper.
         self._apply_filter(event.value)
 
     # `Input.Submitted` fires when the user presses Enter inside `#filter-input`.
@@ -202,10 +212,16 @@ class Stage2FilterApp(App[None]):
     @on(Input.Submitted, "#filter-input")
     def handle_filter_submitted(self) -> None:
         """Move focus into ``#record-list`` when Enter is pressed in the filter."""
+        # Hand keyboard focus to the OptionList so Up/Down arrows immediately
+        # navigate the filtered results without pressing Tab first.
         self.query_one("#record-list", OptionList).focus()
 
+    # Action methods follow Textual's `action_<name>()` naming convention and
+    # are triggered automatically by matching entries in `BINDINGS` (here
+    # `Binding("ctrl+f", "focus_filter", "Filter")`) or via the Command Palette.
     def action_focus_filter(self) -> None:
         """Focus the top filter input (bound to ``Ctrl+F``)."""
+        # Move keyboard focus back to `#filter-input` from anywhere in the app.
         self.query_one("#filter-input", Input).focus()
 
 
