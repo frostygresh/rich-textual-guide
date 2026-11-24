@@ -18,6 +18,7 @@ from __future__ import annotations
 
 from typing import ClassVar
 
+# `@on` is Textual's decorator for routing widget Messages (events) to methods.
 from textual import on
 from textual.app import App, ComposeResult
 from textual.binding import Binding, BindingType
@@ -174,6 +175,17 @@ class Stage2FilterApp(App[None]):
         if self._filtered_indices:
             option_list.highlighted = 0
 
+    # -------------------------------------------------------------------------
+    # Event Handlers (`@on` decorator)
+    # -------------------------------------------------------------------------
+    # Textual widgets communicate by posting Message objects (events) that
+    # bubble up the DOM tree to the App. `@on(MessageClass, "css-selector")`
+    # binds a method to a specific message from matching widgets—cleaner than
+    # the `on_input_changed` naming convention because you can pick any method
+    # name and scope it to `#filter-input` so future Inputs won't trigger it.
+    #
+    # `Input.Changed` fires on every keystroke, passing the new text in
+    # `event.value`.
     @on(Input.Changed, "#filter-input")
     def handle_filter_changed(self, event: Input.Changed) -> None:
         """Re-filter the list immediately on every keystroke.
@@ -184,6 +196,9 @@ class Stage2FilterApp(App[None]):
         """
         self._apply_filter(event.value)
 
+    # `Input.Submitted` fires when the user presses Enter inside `#filter-input`.
+    # Notice that the `event` parameter is optional with `@on`: when a handler
+    # doesn't need data from the message, you can omit `event` completely.
     @on(Input.Submitted, "#filter-input")
     def handle_filter_submitted(self) -> None:
         """Move focus into ``#record-list`` when Enter is pressed in the filter."""
