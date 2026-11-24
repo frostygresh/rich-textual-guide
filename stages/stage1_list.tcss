@@ -1,19 +1,26 @@
 /* Stage 1 Stylesheet (stage1_list.py)
  * Run `textual run --dev stages/stage1_list.py` to live-reload CSS edits.
+ *
+ * Selectors used in this file:
+ * - Type selector (e.g. `Screen`): targets every widget of that class.
+ * - ID selector (`#name`): starts with `#` and targets the single widget
+ *   created with `id="name"` in `compose()` (for example, `#workspace`
+ *   matches `Vertical(id="workspace")`). Because `#` starts an ID selector,
+ *   TCSS comments use block comments instead of `#`.
  */
 
-/* Stack Header, #workspace, and Footer vertically down the screen. */
+/* Type selector: stack Header, #workspace, and Footer vertically. */
 Screen {
     layout: vertical;
 }
 
-/* Main content area between Header and Footer. */
+/* ID selector: targets `Vertical(id="workspace")` from `compose()`. */
 #workspace {
     height: 1fr;        /* Fill all remaining vertical space */
     padding: 1 2;       /* 1 cell top/bottom, 2 cells left/right */
 }
 
-/* Selectable list displaying every dictionary item. */
+/* ID selector: targets `OptionList(..., id="record-list")` from `compose()`. */
 #record-list {
     height: 1fr;            /* Expand to fill the workspace height */
     border: round $accent;  /* Rounded border with border_title support */

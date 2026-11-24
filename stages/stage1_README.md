@@ -237,18 +237,24 @@ Calling `.run()` hands control to Textual's event loop until the user quits (`q`
 Even if you have never written CSS before, Textual CSS (**TCSS**) only takes a handful of rules to get great layouts. Here is the entire Stage 1 stylesheet:
 
 ```css
-/* Stack Header, #workspace, and Footer vertically down the screen. */
+/* Selectors used in this file:
+ * - Type selector (e.g. `Screen`): targets every widget of that class.
+ * - ID selector (`#name`): starts with `#` and targets the single widget
+ *   created with `id="name"` in `compose()`.
+ */
+
+/* Type selector: stack Header, #workspace, and Footer vertically. */
 Screen {
     layout: vertical;
 }
 
-/* Main content area between Header and Footer. */
+/* ID selector: targets `Vertical(id="workspace")` from `compose()`. */
 #workspace {
     height: 1fr;        /* Fill all remaining vertical space */
     padding: 1 2;       /* 1 cell top/bottom, 2 cells left/right */
 }
 
-/* Selectable list displaying every dictionary item. */
+/* ID selector: targets `OptionList(..., id="record-list")` from `compose()`. */
 #record-list {
     height: 1fr;            /* Expand to fill the workspace height */
     border: round $accent;  /* Rounded border with border_title support */
@@ -264,6 +270,31 @@ How to read each part:
 - **`height: 1fr;`**: `fr` stands for **fractional unit**. It tells the widget to expand and take all leftover height not claimed by fixed-size siblings (`Header` and `Footer`), automatically resizing when you drag your terminal window larger or smaller.
 - **`padding: 1 2;`**: Adds inner spacing measured in **terminal character cells**—`1` row above/below and `2` columns left/right.
 - **`border: round $accent;`**: Draws rounded Unicode box corners around `#record-list` using the active theme's `$accent` color variable instead of a hardcoded color.
+
+### Understanding ID Selectors (`#name`)
+
+An **ID selector** (`#name`) is how you target one specific, uniquely named widget across both **TCSS** and **Python**. You assign the name once with `id="..."` in `compose()`, and then reference it with a `#` prefix everywhere else:
+
+1. **Assign the ID in Python (`compose()`):**
+   ```python
+   option_list = OptionList(*labels, id="record-list")
+   ```
+2. **Style that widget in TCSS (`stage1_list.tcss`):**
+   ```css
+   #record-list {
+       height: 1fr;
+       border: round $accent;
+   }
+   ```
+3. **Query that widget in Python (`on_mount()`):**
+   ```python
+   option_list = self.query_one("#record-list", OptionList)
+   ```
+
+Good rules of thumb for ID selectors:
+- **Keep IDs unique per screen:** An `id` is meant to identify one specific widget (like `#workspace`, `#record-list`, or `#filter-input` in Stage 2). If you need to style **multiple** similar widgets the same way (like every row in a form in Stage 4), use a **class selector** (`.form-row` with `classes="form-row"`) instead.
+- **ID naming rules:** Use letters, numbers, hyphens (`-`), and underscores (`_`), starting with a letter or underscore (hyphens like `record-list` are the standard TCSS convention).
+- **Same syntax in `@on` decorators:** Starting in Stage 2, you will also pass ID selectors directly into `@on(Input.Changed, "#filter-input")` so event handlers only listen to that exact widget.
 
 ---
 
