@@ -118,22 +118,41 @@ class Stage1ListApp(App[None]):
         Yields:
             Top-level widgets (``Header``, list container, and ``Footer``).
         """
+        # 1. Dock the top bar; automatically displays `TITLE` and `SUB_TITLE`.
         yield Header()
 
+        # 2. Open a vertical layout container (`#workspace` in stage1_list.tcss).
+        #    Because `yield` pauses inside this `with` block, every widget
+        #    yielded here is mounted as a child of `#workspace`.
         with Vertical(id="workspace"):
+            # 3. Convert each dictionary into a display string ("1. ada_lovelace").
             labels = [
                 self._record_label(i, rec) for i, rec in enumerate(self._records)
             ]
+            # 4. Unpack the labels into a selectable list and tag it with an ID
+            #    so TCSS (`#record-list`) and `on_mount()` can target it.
             option_list = OptionList(*labels, id="record-list")
+            # 5. Display the item count directly inside the list's top border.
             option_list.border_title = f"Items ({len(self._records)})"
+            # 6. Yield the OptionList into the `#workspace` container.
             yield option_list
 
+        # 7. Dock the bottom keybinding bar, auto-populated from `BINDINGS`.
         yield Footer()
 
+    # Textual calls `on_mount()` automatically once every widget yielded by
+    # `compose()` has been mounted into the DOM. It is needed because widgets
+    # do not exist yet during `__init__()` (and aren't mounted yet during
+    # `compose()`), so DOM lookups and initial keyboard focus must happen here.
     def on_mount(self) -> None:
         """Highlight and focus the first list item once the DOM is mounted."""
+        # Look up the mounted OptionList by its `#record-list` ID selector;
+        # passing `OptionList` verifies its type at runtime and for editors.
         option_list = self.query_one("#record-list", OptionList)
+        # Pre-select the first row (0-based index) on startup.
         option_list.highlighted = 0
+        # Give the list keyboard focus so Up/Down arrow keys work immediately
+        # without requiring the user to click it or press Tab first.
         option_list.focus()
 
 
